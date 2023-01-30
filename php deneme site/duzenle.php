@@ -1,9 +1,12 @@
 <?php
+
 include("db.php");
-$id = @$_GET["id"];
+
+// db.php içine aşağıdaki kodu koy 
+# ->     $veritabani = new PDO("mysql:host=localhost;dbname=uye_kayit", "root", "");
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
@@ -24,67 +27,74 @@ $id = @$_GET["id"];
         </ul>
     </div>
     <?php
-  // $veritabani = new PDO("mysql:host=localhost;dbname=uye_kayit", "root", "");
-    // $veritabani_islemi = $veritabani->prepare("SELECT * FROM kayit WHERE id ='$id'");
-    // $veritabani_islemi->execute(array(
-    //     "id" => $id
-    // ));
 
-    // $sonuc = $veritabani_islemi->fetchAll(PDO::FETCH_OBJ);
-    // foreach($sonuc as $veriler ){
-    //     echo $veriler->$id;
-    // }
 
-    if ($_POST) {
+    if ($_POST["guncelle"]) {  #butona tıkladığında name değeri ile tetiklenicek
         $adsoyad = $_POST["adsoyad"];
         $kullanici_adi = $_POST["kullanici_adi"];
         $eposta = $_POST["eposta"];
         $sifre = $_POST["sifre"];
-        $guncelle = mysqli_query($db, "UPDATE kayit SET adsoyad='$adsoyad',
-         kullanici_adi ='$kullanici_adi',eposta='$eposta',sifre ='$sifre'");
-        if ($guncelle) {
-            echo "Güncellendi!";
+
+        $guncelleme_islemi = $veritabani->prepare("UPDATE kayit SET adsoyad=:adsoyad, kullaniciadi=:kullaniciadi, eposta=:eposta, sifre=:sifre  WHERE id=:id");
+        $guncelleme_islemi->execute(array(
+            "id" => $id,
+            "adsoyad" => $adsoyad,
+            "kullanici_adi" => $kullanici_adi,
+            "eposta" => $eposta,
+            "sifre" => $sifre
+        ));
+
+        if ($guncelleme_islemi) {
+            echo "Başarılı";
         } else {
-            echo "Hata!";
+            echo "Başarısız";
         }
     } else {
-        $bul = mysqli_query($db, "SELECT * FROM kayit WHERE id = '$id'");
-       while($goster = mysqli_fetch_array($bul)){
-            extract($goster);
-        echo "<div class = 'flex flex-col bg-white w-100 h-auto m-12 p-4'>" .
-            "<form action='' method = 'post'> 
-                <table cellpadding = '5' cellspacing ='5'> 
-                <tr>
-                    <td> Ad ve soyad:  </td>
-                    <td>  <input type = 'text' value =  '$adsoyad'></td>
-                </tr>
-                <tr>
-                    <td> Kullanıcı adı: </td>
-                    <td>  <input type = 'text' value = '$kullanici_adi'></td>
-                </tr>
-                <tr>
-                    <td> Eposta: </td>
-                    <td>  <input type = 'text' value = '$eposta'></td>
-                </tr>
-                <tr>
-                    <td> Şifre: </td>
-                    <td>  <input type = 'text' value = '$sifre'></td>
-                </tr>
 
-                <tr>
-                    <td> </td>
-                    <td>  <input type = 'submit' value ='GUNCELLE'> </td>
-                </tr>
-             </table>
-             </form> "
-     
-             . "</div>";
-            }
+        $id = $_GET["id"];
+
+        $veritabani_islemi = $veritabani->prepare("SELECT * FROM kayit WHERE id ='$id'");
+        $veritabani_islemi->execute(array(
+            "id" => $id
+        ));
+
+        $sonuc = $veritabani_islemi->fetchAll(PDO::FETCH_OBJ);
+        foreach ($sonuc as $veriler) {
+    ?>
+            <div class='flex flex-col bg-white w-100 h-auto m-12 p-4'>
+                <form action='' method='post'>
+                    <table cellpadding='5' cellspacing='5'>
+                        <tr>
+                            <td> Ad ve soyad: </td>
+                            <td> <input type='text' name="adsoyad" value='<?php $veriler->adsoyad ?>'></td>
+                        </tr>
+                        <tr>
+                            <td> Kullanıcı adı: </td>
+                            <td> <input type='text' name="kullaniciadi" value='<?php $veriler->kullaniciadi ?>'></td>
+                        </tr>
+                        <tr>
+                            <td> Eposta: </td>
+                            <td> <input type='text' name="eposta" value='<?php $veriler->eposta ?>'></td>
+                        </tr>
+                        <tr>
+                            <td> Şifre: </td>
+                            <td> <input type='text' name="sifre" value='<?php $veriler->sifre ?>'></td>
+                        </tr>
+                        <tr>
+                            <td> </td>
+                            <td> <button type="submit" name="guncelle">GÜNCELLE</button></td>
+                        </tr>
+                    </table>
+                </form>
+            </div>"
+    <?php
         }
-   
+    }
+
     ?>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        /* Bunu Tetiklememişsin ???? */
         function passw() {
             var x = document.getElementById("pass");
             if (x.type === "password") {
